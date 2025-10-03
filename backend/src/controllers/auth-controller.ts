@@ -3,11 +3,12 @@ import { User } from "@/database/models/user";
 import { sendWelcomeEmail } from "@/email/emailHandlers";
 import { generateToken } from "@/lib/jwt";
 import { AppError } from "@/utils/app-error";
-import { hash } from "bcryptjs";
+import { hash, compare } from "bcryptjs";
 import { Request, Response } from "express";
 import { z } from "zod";
 
 export class AuthController {
+  // Signup
   async signup(request: Request, response: Response) {
     const bodySchema = z.object({
       name: z.string(),
@@ -57,10 +58,37 @@ export class AuthController {
       message: "Invalid user data",
     });
   }
+
+  // Login
   async login(request: Request, response: Response) {
-    //
+    const bodySchema = z.object({
+      email: z.email(),
+      password: z.string(),
+    });
+
+    const { email, password } = bodySchema.parse(request.body);
+
+    const user = await User.findOne({ email });
+
+    if (!user) return new Error("Invalid credential");
+
+    const isPasswordValid = await compare(password, user.password);
+
+    if (!isPasswordValid) return new AppError("Invalid credential", 401);
+
+    generateToken(user._id.toString(), response);
+
+    return response.status(200).json({
+      _id: user._id,
+      name: user.name,
+      email: user.email,
+      profilePic: user.profilePicture,
+    });
   }
+
+  // Logout
   async logout(request: Request, response: Response) {
-    //
+    response.cookie("jwt", "", { maxAge: 0 });
+    return response.status(200).json({ message: "Logged out successfully" });
   }
 }
