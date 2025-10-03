@@ -6,6 +6,7 @@ import { AppError } from "@/utils/app-error";
 import { hash, compare } from "bcryptjs";
 import { Request, Response } from "express";
 import { z } from "zod";
+import { cloudinary } from "@/lib/claudinary";
 
 export class AuthController {
   // Signup
@@ -90,5 +91,29 @@ export class AuthController {
   async logout(request: Request, response: Response) {
     response.cookie("jwt", "", { maxAge: 0 });
     return response.status(200).json({ message: "Logged out successfully" });
+  }
+
+  // Update Profile
+  async updateProfile(request: Request, response: Response) {
+    const { profilePic } = z
+      .object({
+        profilePic: z.string(),
+      })
+      .parse(request.body);
+
+    const userId = request.user?.id;
+    const uploadResponse = await cloudinary.uploader.upload(profilePic);
+
+    const updatedUser = await User.findByIdAndUpdate(
+      userId,
+      {
+        profilePicture: uploadResponse.secure_url,
+      },
+      { new: true }
+    );
+
+    return response.json({
+      user: updatedUser,
+    });
   }
 }
