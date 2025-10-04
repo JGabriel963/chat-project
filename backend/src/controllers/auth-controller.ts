@@ -39,13 +39,13 @@ export class AuthController {
       const savedUser = await newUser.save();
       generateToken(newUser._id.toString(), response);
 
-      await sendWelcomeEmail(
-        savedUser.email,
-        savedUser.name,
-        process.env.CLIENT_URL!
-      ).catch((error) => {
-        console.log(error);
-      });
+      // await sendWelcomeEmail(
+      //   savedUser.email,
+      //   savedUser.name,
+      //   process.env.CLIENT_URL!
+      // ).catch((error) => {
+      //   console.log(error);
+      // });
 
       return response.status(201).json({
         _id: savedUser._id,
