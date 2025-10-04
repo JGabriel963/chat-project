@@ -5,7 +5,7 @@ import { arcjetProtection } from "@/middlewares/arcjet-middleware";
 
 const authRoutes = Router();
 const authController = new AuthController();
-authRoutes.use(arcjetProtection);
+// authRoutes.use(arcjetProtection);
 
 // Protect route
 // authRoutes.get("/test", arcjetProtection, (req, res) => {
@@ -20,7 +20,7 @@ authRoutes.put(
   authController.updateProfile
 );
 
-authRoutes.put("/check", ensureAuthenticated, (req, res) =>
+authRoutes.get("/check", ensureAuthenticated, (req, res) =>
   res.status(200).json(req.user)
 );
 
