@@ -1,4 +1,5 @@
 import mongoose from "mongoose";
+import { trim } from "zod";
 
 const messageSchema = new mongoose.Schema(
   {
@@ -14,6 +15,8 @@ const messageSchema = new mongoose.Schema(
     },
     text: {
       type: String,
+      trim: true,
+      maxlength: 2000,
     },
     image: {
       type: String,

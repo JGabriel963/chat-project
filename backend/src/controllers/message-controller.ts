@@ -1,17 +1,33 @@
 import { Message } from "@/database/models/message";
 import { User } from "@/database/models/user";
 import { cloudinary } from "@/lib/claudinary";
+import { AppError } from "@/utils/app-error";
 import { Request, Response } from "express";
 import { z } from "zod";
 
 export class MessageController {
   async sendMessage(request: Request, response: Response) {
+    const senderId = request.user?.id;
     const { text, image } = request.body as { text?: string; image?: string };
     const { id: receiverId } = z
       .object({
         id: z.string(),
       })
       .parse(request.params);
+
+    if (!text && !image) {
+      throw new AppError("Text or image is required");
+    }
+
+    if (senderId?.toString() === receiverId.toString()) {
+      throw new AppError("You cannot send a message to yourself");
+    }
+
+    const receiverExists = await User.exists({ _id: receiverId });
+
+    if (receiverExists) {
+      throw new AppError("Receiver does not exist");
+    }
 
     let imageUrl;
     if (image) {
@@ -20,7 +36,7 @@ export class MessageController {
     }
 
     const newMessage = new Message({
-      senderId: request.user?.id,
+      senderId,
       receiverId,
       text,
       image: imageUrl,
