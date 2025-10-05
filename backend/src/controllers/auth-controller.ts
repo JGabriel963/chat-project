@@ -48,7 +48,7 @@ export class AuthController {
       // });
 
       return response.status(201).json({
-        _id: savedUser._id,
+        id: savedUser._id,
         name: savedUser.name,
         email: savedUser.email,
         profilePicture: savedUser.profilePicture,
@@ -80,7 +80,7 @@ export class AuthController {
     generateToken(user._id.toString(), response);
 
     return response.status(200).json({
-      _id: user._id,
+      id: user._id,
       name: user.name,
       email: user.email,
       profilePic: user.profilePicture,

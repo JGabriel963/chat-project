@@ -1,16 +1,21 @@
-import { BrowserRouter, Routes, Route } from "react-router";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router";
 import { LoginPage } from "./pages/login-page";
 import { SignUpPage } from "./pages/signup-page";
 import { ChatPage } from "./pages/chat-page";
 
 import { Toaster } from "react-hot-toast";
 import { useAuthStore } from "./store/use-auth-store";
+import { useEffect } from "react";
+import { Loader } from "./components/loader";
 
 export function App() {
-  const { authUser, isLoading, login } = useAuthStore();
+  const { checkAuth, isCheckingAuth, authUser } = useAuthStore();
 
-  console.log("authUser", authUser);
-  console.log("isLoading", isLoading);
+  useEffect(() => {
+    checkAuth();
+  }, [checkAuth]);
+
+  if (isCheckingAuth) return <Loader />;
 
   return (
     <BrowserRouter>
@@ -21,9 +26,18 @@ export function App() {
 
         {/* Routes */}
         <Routes>
-          <Route path="/" element={<ChatPage />} />
-          <Route path="/login" element={<LoginPage />} />
-          <Route path="/signup" element={<SignUpPage />} />
+          <Route
+            path="/"
+            element={authUser ? <ChatPage /> : <Navigate to="/login" />}
+          />
+          <Route
+            path="/login"
+            element={!authUser ? <LoginPage /> : <Navigate to="/" />}
+          />
+          <Route
+            path="/signup"
+            element={!authUser ? <SignUpPage /> : <Navigate to="/" />}
+          />
         </Routes>
 
         <Toaster />
