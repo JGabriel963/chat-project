@@ -25,7 +25,7 @@ export class MessageController {
 
     const receiverExists = await User.exists({ _id: receiverId });
 
-    if (receiverExists) {
+    if (!receiverExists) {
       throw new AppError("Receiver does not exist");
     }
 

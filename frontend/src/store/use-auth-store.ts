@@ -3,6 +3,7 @@ import { api } from "../lib/axios";
 import type { SignUpSchema } from "../http/schemas/signup";
 import toast from "react-hot-toast";
 import type { LoginSchema } from "../http/schemas/login";
+import type { UploadProfileSchema } from "../http/schemas/upload-profile";
 
 type AuthStore = {
   authUser: UserCheckResponse | null;
@@ -11,6 +12,7 @@ type AuthStore = {
   signUp: (data: SignUpSchema) => Promise<void>;
   login: (data: LoginSchema) => Promise<void>;
   logout: () => Promise<void>;
+  updateProfile: (data: UploadProfileSchema) => Promise<void>;
 };
 
 export const useAuthStore = create<AuthStore>()((set) => ({
@@ -54,6 +56,19 @@ export const useAuthStore = create<AuthStore>()((set) => ({
       toast.success("Deslogado com sucesso!");
     } catch (error) {
       toast.error("Erro ao deslogar!");
+    }
+  },
+  updateProfile: async (data: UploadProfileSchema) => {
+    try {
+      const res = await api.put<UploadProfileResponse>(
+        "/auth/update-profile",
+        data
+      );
+      set({ authUser: { id: res.data.user._id, ...res.data.user } });
+      toast.success("Perfil atualizado com sucesso!");
+    } catch (error) {
+      console.log(error);
+      toast.error("Erro ao atualizar o perfil!");
     }
   },
 }));
