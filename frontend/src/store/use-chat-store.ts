@@ -1,6 +1,12 @@
 import { create } from "zustand";
 import { api } from "../lib/axios";
 import toast from "react-hot-toast";
+import { useAuthStore } from "./use-auth-store";
+
+export type MessagePaylod = {
+  text?: string;
+  image?: string;
+};
 
 type ChatStore = {
   allContacts: Contact[];
@@ -18,6 +24,7 @@ type ChatStore = {
   getAllContacts: () => Promise<void>;
   getChats: () => Promise<void>;
   getMessagesByUserId: (userId: string) => Promise<void>;
+  sendMessage: (data: MessagePaylod) => Promise<void>;
 };
 
 export const useChatStore = create<ChatStore>()((set, get) => ({
@@ -79,6 +86,32 @@ export const useChatStore = create<ChatStore>()((set, get) => ({
       toast.error("Erro ao buscar mensagens!");
     } finally {
       set({ isMessagesLoading: false });
+    }
+  },
+  sendMessage: async (data: MessagePaylod) => {
+    const { selectedUser, messages } = get();
+    const { authUser } = useAuthStore.getState();
+
+    const tempId = `temp-${Date.now()}`;
+    const optimisticMessage: Messages = {
+      _id: tempId,
+      senderId: authUser?.id || "",
+      receiverId: selectedUser?._id || "",
+      image: data.image || "",
+      text: data.text || "",
+      createdAt: new Date().toISOString(),
+    };
+
+    set({ messages: [...messages, optimisticMessage] });
+    try {
+      const res = await api.post<SendMessageResponse>(
+        `/messages/send/${selectedUser?._id}`,
+        data
+      );
+      set({ messages: messages.concat(res.data.newMessage) });
+    } catch (error) {
+      set({ messages: messages });
+      toast.error("Erro ao enviar mensagem!");
     }
   },
 }));

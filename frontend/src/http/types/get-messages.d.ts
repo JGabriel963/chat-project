@@ -10,3 +10,7 @@ type Messages = {
 type GetMessagesResponse = {
   messages: Messages[];
 };
+
+type SendMessageResponse = {
+  newMessage: Messages;
+};
