@@ -7,7 +7,9 @@ import type { UploadProfileSchema } from "../http/schemas/upload-profile";
 import { io, type Socket } from "socket.io-client";
 
 const BASE_URL =
-  import.meta.env.MODE === "development" ? "http://localhost:3333" : "/";
+  import.meta.env.MODE === "development"
+    ? "http://localhost:3333"
+    : import.meta.env.BACKEND_URL;
 
 type AuthStore = {
   authUser: UserCheckResponse | null;
