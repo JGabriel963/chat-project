@@ -1,10 +1,10 @@
 import "dotenv/config";
 import { connectDB } from "./lib/mongo";
-import { app } from "./app";
+import { server } from "./lib/socket";
 
 const PORT = process.env.PORT || 3333;
 
-app.listen(PORT, () => {
+server.listen(PORT, () => {
   console.log("Server is running");
   connectDB();
 });

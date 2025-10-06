@@ -1,10 +1,13 @@
+import { Socket } from "socket.io";
+
 declare module "socket.io" {
-  export interface Socket {
+  interface Socket {
     user?: {
       id: string;
       name: string;
       email: string;
       profilePicture: string;
     };
+    userId?: string;
   }
 }

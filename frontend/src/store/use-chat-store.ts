@@ -25,6 +25,8 @@ type ChatStore = {
   getChats: () => Promise<void>;
   getMessagesByUserId: (userId: string) => Promise<void>;
   sendMessage: (data: MessagePaylod) => Promise<void>;
+  subscribeToMessages: () => void;
+  unsubscribeFromMessages: () => void;
 };
 
 export const useChatStore = create<ChatStore>()((set, get) => ({
@@ -110,8 +112,38 @@ export const useChatStore = create<ChatStore>()((set, get) => ({
       );
       set({ messages: messages.concat(res.data.newMessage) });
     } catch (error) {
+      console.log(error);
       set({ messages: messages });
       toast.error("Erro ao enviar mensagem!");
     }
+  },
+  subscribeToMessages: () => {
+    const { selectedUser, isSoundEnabled } = get();
+    if (!selectedUser) return;
+
+    const socket = useAuthStore.getState().socket;
+
+    if (!socket) return;
+
+    socket.on("newMessage", (message: Messages) => {
+      const isMessageSentFromSelectedUser =
+        message.senderId === selectedUser._id;
+
+      if (!isMessageSentFromSelectedUser) return;
+
+      const currentMessage = get().messages;
+      set({ messages: [...currentMessage, message] });
+
+      if (isSoundEnabled) {
+        const notificationSound = new Audio("/sounds/notification.mp3");
+        notificationSound.currentTime = 0;
+        notificationSound.play().catch((e) => console.log(e));
+      }
+    });
+  },
+  unsubscribeFromMessages: () => {
+    const socket = useAuthStore.getState().socket;
+
+    if (socket) socket.off("newMessage");
   },
 }));

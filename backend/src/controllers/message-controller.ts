@@ -1,6 +1,7 @@
 import { Message } from "@/database/models/message";
 import { User } from "@/database/models/user";
 import { cloudinary } from "@/lib/claudinary";
+import { getReceiverSocketId, io } from "@/lib/socket";
 import { AppError } from "@/utils/app-error";
 import { Request, Response } from "express";
 import { z } from "zod";
@@ -45,6 +46,11 @@ export class MessageController {
     await newMessage.save();
 
     // todo: send message in real-time if user is online - socket.io
+    const receiverScoketId = getReceiverSocketId(receiverId);
+
+    if (receiverScoketId) {
+      io.to(receiverScoketId).emit("newMessage", newMessage);
+    }
 
     return response.json({
       newMessage,
