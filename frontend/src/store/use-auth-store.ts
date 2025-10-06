@@ -6,10 +6,7 @@ import type { LoginSchema } from "../http/schemas/login";
 import type { UploadProfileSchema } from "../http/schemas/upload-profile";
 import { io, type Socket } from "socket.io-client";
 
-const BASE_URL =
-  import.meta.env.MODE === "development"
-    ? "http://localhost:3333"
-    : import.meta.env.BACKEND_URL;
+const BASE_URL = import.meta.env.VITE_BACKEND_URL;
 
 type AuthStore = {
   authUser: UserCheckResponse | null;
